@@ -1,7 +1,7 @@
 # ADR-0002: Вектор-стор — Chroma vs FAISS
 
 - Статус: Accepted
-- Дата: 2025-XX-XX
+- Дата: 2026-10-09
 
 ## Решение
 - Dev / MVP: Chroma.

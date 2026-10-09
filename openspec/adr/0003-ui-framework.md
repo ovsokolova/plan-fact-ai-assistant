@@ -1,7 +1,7 @@
 # ADR-0003: UI — Streamlit
 
 - Статус: Accepted
-- Дата: 2025-XX-XX
+- Дата: 2026-10-09
 
 ## Решение
 UI на Streamlit.

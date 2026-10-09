@@ -1,3 +1,6 @@
+
+> **Статус проекта:** 🚧 Дизайн-документация готова, идёт реализация MVP.
+> См. [openspec/tasks.md](openspec/tasks.md) — прогресс по эпикам.
 # ИИ-ассистент по анализу отклонений «План vs Факт»
 
 > Интеллектуальный помощник для финансовых аналитиков: загрузите план и факт — получите аналитическую записку, графики и ссылки на пункты договоров.
@@ -109,7 +112,7 @@ LLM_MODEL=gpt-4o-mini
 ### 5. Запуск
 
 ```bash
-streamlit run app.py
+streamlit run app/main.py
 ```
 
 Откройте `http://localhost:8501` в браузере.
@@ -201,3 +204,12 @@ MIT — см. [LICENSE](LICENSE).
 **Ваше Имя** — финансовый аналитик
 
 *«Рутина — для скриптов, выводы — для аналитика.»*
+## 📐 OpenSpec
+
+- [Proposal](openspec/proposal.md)
+- [Specs](openspec/specs/)
+- [Design](openspec/design.md)
+- [ADRs](openspec/adr/)
+- [API Contract](openspec/api-contract.md)
+- [Test Plan](openspec/test-plan.md)
+- [Tasks](openspec/tasks.md)

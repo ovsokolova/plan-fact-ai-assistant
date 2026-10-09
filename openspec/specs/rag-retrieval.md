@@ -7,7 +7,7 @@
 
 - FR-4.1 Загрузка PDF/DOCX из data/docs/.
 - FR-4.2 Чанкинг: 500–1000 токенов, overlap 100, метаданные (файл, страница, пункт).
-- FR-4.3 Эмбеддинги: OpenAI text-embedding-3-small или intfloat/multilingual-e5-base.
+- FR-4.3 Эмбеддинги: OpenAI text-embedding-3-small или intfloat/multilingual-e5-base (default).
 - FR-4.4 Вектор-стор: Chroma (dev) / FAISS (prod).
 - FR-4.5 Retrieval: top-k = 5, min_score = 0.75.
 - FR-4.6 Каждый чанк — с source, page, clause.

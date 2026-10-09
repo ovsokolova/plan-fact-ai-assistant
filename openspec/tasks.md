@@ -10,18 +10,18 @@
 - [ ] CI: GitHub Actions (lint + pytest)
 
 ## Эпик 1. Data Ingestion
-- [ ] loader.py: чтение xlsx/csv
-- [ ] нормализация схемы
-- [ ] валидация обязательных колонок
-- [ ] обработка дублей
+- [x] loader.py: чтение xlsx/csv
+- [x] нормализация схемы
+- [x] валидация обязательных колонок
+- [x] обработка дублей
 - [ ] unit-тесты AC-1..AC-3
-- [ ] фикстуры: data/examples/plan.xlsx, fact.xlsx
+- [x] фикстуры: tests/conftest.py
 
 ## Эпик 2. Variance Analysis
-- [ ] compute(): abs/rel variance
-- [ ] светофор
-- [ ] топ-N по модулю и по %
-- [ ] агрегация по owner и period
+- [x] compute(): abs/rel variance
+- [x] светофор
+- [x] топ-N по модулю и по %
+- [x] агрегация по owner и period
 - [ ] unit-тесты AC-1..AC-3
 
 ## Эпик 3. RAG
@@ -42,21 +42,21 @@
 - [ ] fallback-шаблон
 - [ ] eval-набор из 10 кейсов
 
-## Эпик 5. Charts
+## Эпик 5. Charts (spec: charts)
 - [ ] план vs факт (bar)
 - [ ] waterfall по топ-N
 - [ ] динамика по периодам
 - [ ] экспорт в HTML
 
-## Эпик 6. UI
-- [ ] загрузка файлов
-- [ ] таблица отклонений
+## Эпик 6. UI (spec: ui)
+- [x] загрузка файлов
+- [x] таблица отклонений
 - [ ] графики
 - [ ] панель отчёта
 - [ ] чат с уточнениями
 - [ ] настройки
 
-## Эпик 7. Отчёт и экспорт
+## Эпик 7. Отчёт и экспорт (spec: export)
 - [ ] report.render() -> markdown
 - [ ] экспорт DOCX
 - [ ] экспорт PDF

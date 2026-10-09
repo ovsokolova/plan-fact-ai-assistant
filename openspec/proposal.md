@@ -2,7 +2,7 @@
 
 - **Статус:** Draft → Accepted
 - **Автор:** realrvs
-- **Дата:** 2025-XX-XX
+- **Дата:** 2026-10-09
 - **Репозиторий:** ovsokolova/plan-fact-ai-assistant
 
 ## 1. Проблема
