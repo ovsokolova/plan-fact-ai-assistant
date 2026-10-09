@@ -1,10 +1,15 @@
-﻿# Python
+# Python
 __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
 venv/
 env/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
 
 # Env
 .env
@@ -27,16 +32,27 @@ chroma/
 faiss_index/
 *.faiss
 
-# Data
-data/docs/*.pdf
-data/docs/*.docx
-data/examples/*.xlsx
-*.log
+# Data (не коммитим чувствительные данные)
+data/docs/*
+!data/docs/.gitkeep
+data/examples/*
+!data/examples/.gitkeep
 
-# OS
+# Logs / OS
+*.log
 .DS_Store
 Thumbs.db
 
 # Build
 build/
 dist/
+
+# Bootstrap scripts
+update-all.ps1
+setup-openspec.ps1
+
+# Streamlit temp uploads
+.streamlit_tmp/
+
+# Runtime data
+.chroma/

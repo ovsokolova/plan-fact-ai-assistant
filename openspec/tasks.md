@@ -26,12 +26,12 @@
 
 ## Эпик 3. RAG
 - [ ] загрузка PDF/DOCX
-- [ ] чанкинг с метаданными
-- [ ] эмбеддинги (OpenAI + e5)
-- [ ] Chroma backend
+- [x] чанкинг с метаданными
+- [~] эмбеддинги (Chroma default; e5 — TODO)
+- [x] Chroma backend
 - [ ] FAISS backend
-- [ ] retrieve() c top-k и min_score
-- [ ] integration-тесты AC-1..AC-3
+- [x] retrieve() c top-k и min_score
+- [x] integration-тесты AC-1..AC-3
 
 ## Эпик 4. LLM Report
 - [ ] LLMClient (OpenAI)
@@ -43,16 +43,16 @@
 - [ ] eval-набор из 10 кейсов
 
 ## Эпик 5. Charts (spec: charts)
-- [ ] план vs факт (bar)
-- [ ] waterfall по топ-N
-- [ ] динамика по периодам
+- [x] план vs факт (bar)
+- [x] waterfall по топ-N
+- [x] динамика по периодам
 - [ ] экспорт в HTML
 
 ## Эпик 6. UI (spec: ui)
 - [x] загрузка файлов
 - [x] таблица отклонений
-- [ ] графики
-- [ ] панель отчёта
+- [x] графики (5 вкладок)
+- [~] панель отчёта (CSV-экспорт)
 - [ ] чат с уточнениями
 - [ ] настройки
 
