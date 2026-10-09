@@ -34,11 +34,11 @@
 - [x] integration-тесты AC-1..AC-3
 
 ## Эпик 4. LLM Report
-- [ ] LLMClient (OpenAI)
-- [ ] LLMClient (Ollama)
-- [ ] промпт под JSON-mode
-- [ ] Pydantic-схема ReportJSON
-- [ ] retry при невалидном JSON
+- [x] LLMClient (OpenAI)
+- [x] LLMClient (Ollama)
+- [x] промпт под JSON-mode
+- [x] Pydantic-схема ReportJSON
+- [~] retry при невалидном JSON (fallback есть)
 - [ ] fallback-шаблон
 - [ ] eval-набор из 10 кейсов
 
