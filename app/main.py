@@ -9,6 +9,7 @@ import streamlit as st
 
 from src.analyzer import aggregate_by_owner, compute
 from src.charts import make_bar, make_line, make_owner_bar, make_waterfall
+from src.export import export_charts_html, report_to_docx
 from src.llm_agent import generate, report_to_dict, report_to_markdown
 from src.loader import load
 from src.rag import ingest_directory, make_store, retrieve
@@ -185,10 +186,35 @@ if plan_file and fact_file:
                     data=_json.dumps(report_to_dict(report), ensure_ascii=False, indent=2).encode("utf-8"),
                     file_name="report.json", mime="application/json",
                 )
+                docx_bytes = report_to_docx(report)
+                st.download_button(
+                    "Скачать .docx",
+                    data=docx_bytes,
+                    file_name="report.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                )
+
                 if report.meta.model == "fallback":
                     st.warning("LLM недоступна — сгенерирован шаблонный отчёт.")
                 if report.meta.masked:
                     st.info("Суммы маскированы перед отправкой в LLM.")
+
+        # --- Экспорт графиков в HTML (кнопка в сайдбаре) ---
+        with st.sidebar:
+            st.divider()
+            st.header("Экспорт графиков")
+            if st.button("Сохранить графики в HTML"):
+                charts = {
+                    "bar": make_bar(result, top_n=int(top_n_charts)),
+                    "waterfall": make_waterfall(result, top_n=int(top_n_charts)),
+                    "line": make_line(result),
+                }
+                if "owner" in df.columns:
+                    charts["owner"] = make_owner_bar(aggregate_by_owner(result))
+                files = export_charts_html(charts, output_dir="exports/charts")
+                st.success(f"Сохранено {len(files)} файлов в exports/charts/")
+                for f in files:
+                    st.caption(str(f))
 
     except FileNotFoundError as e:
         st.error(f"Файл не найден: {e}")

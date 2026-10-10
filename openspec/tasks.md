@@ -58,7 +58,7 @@
 
 ## Эпик 7. Отчёт и экспорт (spec: export)
 - [ ] report.render() -> markdown
-- [ ] экспорт DOCX
+- [x] экспорт DOCX
 - [ ] экспорт PDF
 - [ ] ReportJSON -> JSON Schema
 
