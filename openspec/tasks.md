@@ -59,7 +59,7 @@
 ## Эпик 7. Отчёт и экспорт (spec: export)
 - [ ] report.render() -> markdown
 - [x] экспорт DOCX
-- [ ] экспорт PDF
+- [x] экспорт PDF (WeasyPrint, soft-import)
 - [ ] ReportJSON -> JSON Schema
 
 ## Эпик 8. Качество и безопасность

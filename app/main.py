@@ -9,10 +9,13 @@ import streamlit as st
 
 from src.analyzer import aggregate_by_owner, compute
 from src.charts import make_bar, make_line, make_owner_bar, make_waterfall
-from src.export import export_charts_html, report_to_docx
+from src.export import export_charts_html, report_to_docx, report_to_pdf
 from src.llm_agent import generate, report_to_dict, report_to_markdown
 from src.loader import load
+from src.logging_setup import setup_logging
 from src.rag import ingest_directory, make_store, retrieve
+
+setup_logging()
 
 st.set_page_config(page_title="План vs Факт", page_icon="chart", layout="wide")
 st.title("План vs Факт — анализ отклонений")
@@ -194,6 +197,16 @@ if plan_file and fact_file:
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 )
 
+                pdf_bytes = report_to_pdf(report)
+                if pdf_bytes is not None:
+                    st.download_button(
+                        "Скачать .pdf",
+                        data=pdf_bytes,
+                        file_name="report.pdf",
+                        mime="application/pdf",
+                    )
+                else:
+                    st.caption("PDF недоступен: установите `pip install weasyprint`")
                 if report.meta.model == "fallback":
                     st.warning("LLM недоступна — сгенерирован шаблонный отчёт.")
                 if report.meta.masked:
