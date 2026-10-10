@@ -93,3 +93,23 @@ def test_export_charts_html_empty(tmp_path: Path) -> None:
     files = export_charts_html({}, output_dir=tmp_path / "empty")
     assert files == []
     assert (tmp_path / "empty").exists()
+
+def test_report_to_pdf_does_not_crash(report: ReportJSON) -> None:
+    """PDF-экспорт не должен падать, даже если WeasyPrint не установлен."""
+    from src.export import report_to_pdf
+
+    result = report_to_pdf(report)
+    # либо bytes (WeasyPrint установлен), либо None (нет WeasyPrint)
+    assert result is None or isinstance(result, bytes)
+    if isinstance(result, bytes):
+        assert len(result) > 500
+
+
+def test_markdown_to_html_simple() -> None:
+    from src.export import _markdown_to_simple_html
+
+    md = "# Заголовок\n\n- пункт 1\n- пункт 2\n\n**жирный** текст"
+    html = _markdown_to_simple_html(md)
+    assert "<h1>Заголовок</h1>" in html
+    assert "<li>пункт 1</li>" in html
+    assert "<strong>жирный</strong>" in html

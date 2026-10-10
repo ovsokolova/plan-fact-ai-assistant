@@ -6,15 +6,15 @@
 - [x] init repo, .gitignore, README
 - [ ] requirements.txt / pyproject.toml
 - [ ] .env.example
-- [ ] pre-commit: ruff, black
-- [ ] CI: GitHub Actions (lint + pytest)
+- [x] pre-commit: ruff, black
+- [x] CI: GitHub Actions (lint + pytest)
 
 ## Эпик 1. Data Ingestion
 - [x] loader.py: чтение xlsx/csv
 - [x] нормализация схемы
 - [x] валидация обязательных колонок
 - [x] обработка дублей
-- [ ] unit-тесты AC-1..AC-3
+- [x] unit-тесты AC-1..AC-3
 - [x] фикстуры: tests/conftest.py
 
 ## Эпик 2. Variance Analysis
@@ -22,7 +22,7 @@
 - [x] светофор
 - [x] топ-N по модулю и по %
 - [x] агрегация по owner и period
-- [ ] unit-тесты AC-1..AC-3
+- [x] unit-тесты AC-1..AC-3
 
 ## Эпик 3. RAG
 - [ ] загрузка PDF/DOCX
@@ -40,13 +40,13 @@
 - [x] Pydantic-схема ReportJSON
 - [~] retry при невалидном JSON (fallback есть)
 - [ ] fallback-шаблон
-- [ ] eval-набор из 10 кейсов
+- [~] eval-набор (интеграционные тесты есть)
 
 ## Эпик 5. Charts (spec: charts)
 - [x] план vs факт (bar)
 - [x] waterfall по топ-N
 - [x] динамика по периодам
-- [ ] экспорт в HTML
+- [x] экспорт в HTML
 
 ## Эпик 6. UI (spec: ui)
 - [x] загрузка файлов
@@ -64,9 +64,9 @@
 
 ## Эпик 8. Качество и безопасность
 - [ ] маскирование сумм перед OpenAI
-- [ ] логи без сумм/PII
+- [x] логи без сумм/PII (SanitizingFormatter)
 - [ ] тесты на утечки
-- [ ] README: раздел privacy
+- [~] README: раздел privacy (в roadmap)
 
 ## Эпик 9. Docs
 - [x] openspec/proposal.md

@@ -100,3 +100,74 @@ def export_charts_html(
 def report_to_markdown_bytes(markdown: str) -> bytes:
     """Обёртка для скачивания .md с корректным BOM-less UTF-8."""
     return markdown.encode("utf-8")
+
+def report_to_pdf(report: ReportJSON, *, markdown_text: str | None = None) -> bytes | None:
+    """Экспорт отчёта в PDF.
+
+    Стратегия: markdown -> HTML -> WeasyPrint -> PDF.
+    Если WeasyPrint не установлен или системные библиотеки недоступны —
+    возвращает None (UI покажет «PDF недоступен»).
+
+    Установка (опционально):
+        pip install weasyprint
+        # Linux: sudo apt install libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz0b
+    """
+    try:
+        from weasyprint import HTML  # type: ignore
+    except Exception:  # noqa: BLE001
+        return None
+
+    # Локальный импорт, чтобы избежать циклической зависимости
+    from src.llm_agent import report_to_markdown as _md
+
+    md = markdown_text if markdown_text is not None else _md(report)
+    html = _markdown_to_simple_html(md)
+
+    try:
+        return HTML(string=html).write_pdf()
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _markdown_to_simple_html(md: str) -> str:
+    """Минимальный конвертер markdown -> HTML для PDF.
+
+    Поддерживает: заголовки #..###, жирный **, курсив *, списки -, абзацы.
+    Не тянет внешние зависимости.
+    """
+    import html as _html
+    import re as _re
+
+    lines = md.splitlines()
+    out: list[str] = ['<html><head><meta charset="utf-8">',
+                      '<style>body{font-family:sans-serif;line-height:1.5;max-width:800px;margin:2em auto;padding:0 1em;}',
+                      'h1{font-size:22px;} h2{font-size:18px;margin-top:1.5em;} h3{font-size:15px;color:#333;}',
+                      'ul{margin:.4em 0;} li{margin:.2em 0;}</style></head><body>']
+
+    for raw in lines:
+        line = raw.rstrip()
+        if not line:
+            out.append("<p></p>")
+            continue
+        m = _re.match(r"^(#{1,3})\s+(.*)$", line)
+        if m:
+            lvl = len(m.group(1))
+            out.append(f"<h{lvl}>{_inline(m.group(2))}</h{lvl}>")
+            continue
+        if line.startswith("- "):
+            out.append(f"<li>{_inline(line[2:])}</li>")
+            continue
+        out.append(f"<p>{_inline(line)}</p>")
+
+    out.append("</body></html>")
+    return "\n".join(out)
+
+
+def _inline(text: str) -> str:
+    import html as _html
+    import re as _re
+
+    text = _html.escape(text)
+    text = _re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
+    text = _re.sub(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", r"<em>\1</em>", text)
+    return text
