@@ -2,7 +2,13 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 import pandas as pd
 import streamlit as st
@@ -18,6 +24,23 @@ from src.rag import ingest_directory, make_store, retrieve
 setup_logging()
 
 st.set_page_config(page_title="План vs Факт", page_icon="chart", layout="wide")
+st.markdown(
+    """
+    <style>
+    .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+        font-size: 16px; font-weight: 600; color: #1f2937;
+    }
+    .stTabs [data-baseweb="tab-list"] button {
+        background-color: #f3f4f6; border-radius: 8px 8px 0 0;
+        margin-right: 4px; padding: 8px 16px;
+    }
+    .stTabs [aria-selected="true"] { background-color: #dc2626 !important; }
+    .stTabs [aria-selected="true"] p { color: #ffffff !important; font-weight: 700; }
+    .stTabs [data-baseweb="tab-list"] button:hover { background-color: #e5e7eb; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 st.title("План vs Факт — анализ отклонений")
 st.caption("MVP: загрузка, отклонения, графики, RAG, LLM-записка")
 

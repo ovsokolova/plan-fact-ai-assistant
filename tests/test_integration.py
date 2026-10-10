@@ -42,15 +42,20 @@ def rag_store(tmp_path: Path) -> ChromaVectorStore:
     return store
 
 
+def _make_mock_client(*, available: bool, response: str = "", model: str = "mock-model") -> MagicMock:
+    """Создаёт MagicMock с настроенными config и available."""
+    mock = MagicMock(spec=LLMClient)
+    mock.available.return_value = available
+    mock.config = LLMConfig(provider="openai", model=model, api_key="test")
+    if response:
+        mock.complete.return_value = response
+    return mock
+
+
 def test_full_pipeline_retrieve_then_generate(variance_df, rag_store) -> None:
     """RAG -> chunks -> LLM (mock) -> ReportJSON."""
     chunks = retrieve(rag_store, "предоплата маркетинг", k=3, min_score=0.0)
     assert len(chunks) >= 1
-
-    # Мокаем LLM-клиент: available=True + отдаём валидный JSON
-    mock_client = MagicMock(spec=LLMClient)
-    mock_client.available.return_value = True
-    mock_client.config = LLMConfig(model="mock-model", api_key="test")
 
     fake_json = {
         "summary": "Перерасход маркетинга связан с предоплатой.",
@@ -73,7 +78,12 @@ def test_full_pipeline_retrieve_then_generate(variance_df, rag_store) -> None:
             }
         ],
     }
-    mock_client.complete.return_value = json.dumps(fake_json, ensure_ascii=False)
+
+    mock_client = _make_mock_client(
+        available=True,
+        response=json.dumps(fake_json, ensure_ascii=False),
+        model="mock-model",
+    )
 
     report = generate(variance_df, chunks, client=mock_client)
 
@@ -87,8 +97,7 @@ def test_pipeline_fallback_when_llm_unavailable(variance_df, rag_store) -> None:
     """Если LLM недоступна — отчёт всё равно генерируется (fallback)."""
     chunks = retrieve(rag_store, "предоплата", k=3, min_score=0.0)
 
-    mock_client = MagicMock(spec=LLMClient)
-    mock_client.available.return_value = False
+    mock_client = _make_mock_client(available=False)
 
     report = generate(variance_df, chunks, client=mock_client)
     assert report.meta.model == "fallback"
@@ -101,26 +110,20 @@ def test_rag_empty_then_generate(variance_df, tmp_path: Path) -> None:
     chunks = retrieve(empty_store, "ничего", k=5, min_score=0.0)
     assert chunks == []
 
-    mock_client = MagicMock(spec=LLMClient)
-    mock_client.available.return_value = False
+    mock_client = _make_mock_client(available=False)
     report = generate(variance_df, chunks, client=mock_client)
     assert report.meta.model == "fallback"
 
 
 def test_masked_generation_roundtrip(variance_df) -> None:
-    """Маскирование сумм + демаскирование после mock-ответа."""
-    mock_client = MagicMock(spec=LLMClient)
-    mock_client.available.return_value = True
-    mock_client.config = LLMConfig(model="mock", api_key="x")
-
-    # LLM возвращает текст с токенами (как будто суммы были замаскированы)
+    """Маскирование сумм + демаскирование."""
     fake = {
         "summary": "Отклонение __NUM_0001__",
         "items": [
             {
                 "account": "Маркетинг",
                 "period": "2025-01",
-                "abs_variance": 0.0,
+                "abs_variance": 350000.0,
                 "rel_variance": 0.35,
                 "hypotheses": ["Причина __NUM_0001__"],
                 "references": [],
@@ -128,9 +131,65 @@ def test_masked_generation_roundtrip(variance_df) -> None:
             }
         ],
     }
-    mock_client.complete.return_value = json.dumps(fake)
+    mock_client = _make_mock_client(
+        available=True,
+        response=json.dumps(fake),
+        model="mock",
+    )
 
     report = generate(variance_df, [], client=mock_client, mask=True)
-    # Токен остался в тексте, т.к. mapping не содержит __NUM_0001__
-    # (в этом тесте мы не прогоняли mask через настоящий Masker)
     assert isinstance(report, ReportJSON)
+
+
+def test_number_coercion_percent_string(variance_df) -> None:
+    """'3.43%' и '-5.0%' нормализуются в float."""
+    fake = {
+        "summary": "Резюме",
+        "items": [
+            {
+                "account": "Маркетинг",
+                "period": "2025-01",
+                "abs_variance": "350 000",
+                "rel_variance": "35%",
+                "hypotheses": ["гипотеза"],
+                "references": [],
+                "questions": ["вопрос"],
+            }
+        ],
+    }
+    mock_client = _make_mock_client(
+        available=True,
+        response=json.dumps(fake),
+        model="mock",
+    )
+
+    report = generate(variance_df, [], client=mock_client)
+    assert report.items[0].abs_variance == 350000.0
+    assert abs(report.items[0].rel_variance - 0.35) < 1e-9
+
+
+def test_numeric_field_restored_from_df(variance_df) -> None:
+    """Если LLM вернул '__NUM_xxxx__' — подставляем значение из DataFrame."""
+    fake = {
+        "summary": "Резюме",
+        "items": [
+            {
+                "account": "Маркетинг",
+                "period": "2025-01",
+                "abs_variance": "__NUM_0003__",
+                "rel_variance": "__NUM_0004__%",
+                "hypotheses": ["гипотеза"],
+                "references": [],
+                "questions": ["вопрос"],
+            }
+        ],
+    }
+    mock_client = _make_mock_client(
+        available=True,
+        response=json.dumps(fake),
+        model="mock",
+    )
+
+    report = generate(variance_df, [], client=mock_client)
+    assert report.items[0].abs_variance == 350000.0
+    assert abs(report.items[0].rel_variance - 0.35) < 1e-9
