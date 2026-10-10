@@ -59,3 +59,7 @@ setup-openspec.ps1
 
 # Exports
 exports/
+
+# Test data
+*.xlsx
+*.csv
