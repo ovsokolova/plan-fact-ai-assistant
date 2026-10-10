@@ -11,6 +11,9 @@ from typing import Any
 import pandas as pd
 from pydantic import BaseModel, Field
 
+from dotenv import load_dotenv
+load_dotenv(override=True)
+
 from src.mask import Masker
 from src.rag import Chunk
 
@@ -108,6 +111,17 @@ class LLMConfig:
     @classmethod
     def from_env(cls) -> LLMConfig:
         provider = os.getenv("LLM_PROVIDER", "openai").lower()
+
+        if provider == "yandex":
+            return cls(
+                provider="yandex",
+                model=os.getenv("YANDEX_MODEL", "yandexgpt-lite"),
+                api_key=os.getenv("YANDEX_API_KEY"),
+                base_url=os.getenv("YANDEX_FOLDER_ID"),
+                timeout=int(os.getenv("YANDEX_TIMEOUT", "60")),
+                temperature=float(os.getenv("YANDEX_TEMPERATURE", "0.2")),
+            )
+
         return cls(
             provider=provider,
             model=os.getenv("LLM_MODEL", "gpt-4o-mini"),
@@ -123,18 +137,71 @@ class LLMClient:
         self.config = config or LLMConfig.from_env()
 
     def available(self) -> bool:
-        if self.config.provider == "ollama":
+        p = self.config.provider
+        if p == "ollama":
             return bool(self.config.base_url)
+        if p == "yandex":
+            # base_url хранит folder_id
+            return bool(self.config.api_key and self.config.base_url)
         return bool(self.config.api_key)
 
     def complete(self, system: str, user: str) -> str:
         if not self.available():
-            raise RuntimeError("LLM не сконфигурирован")
+            raise RuntimeError("LLM not configured")
+        # --- YandexGPT ---
+        if self.config.provider == "yandex":
+            import requests
+
+            folder_id = self.config.base_url
+            api_key = self.config.api_key
+            url = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion"
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Api-Key {api_key}",
+            }
+            model_uri = f"gpt://{folder_id}/{self.config.model}/latest"
+            body = {
+                "modelUri": model_uri,
+                "completionOptions": {
+                    "stream": False,
+                    "temperature": self.config.temperature,
+                    "maxTokens": 2000,
+                },
+                "messages": [
+                    {"role": "system", "text": system},
+                    {"role": "user", "text": user},
+                ],
+            }
+            r = requests.post(url, headers=headers, json=body, timeout=self.config.timeout)
+            r.raise_for_status()
+            data = r.json()
+            return data["result"]["alternatives"][0]["message"]["text"]
+
+        if self.config.provider == "ollama":
+            import requests
+
+            base = (self.config.base_url or "http://localhost:11434").rstrip("/")
+            r = requests.post(
+                f"{base}/api/chat",
+                json={
+                    "model": self.config.model,
+                    "messages": [
+                        {"role": "system", "content": system},
+                        {"role": "user", "content": user},
+                    ],
+                    "stream": False,
+                    "options": {"temperature": self.config.temperature},
+                    "format": "json",
+                },
+                timeout=self.config.timeout,
+            )
+            r.raise_for_status()
+            return r.json().get("message", {}).get("content", "")
 
         from openai import OpenAI
 
         kwargs: dict[str, Any] = {
-            "api_key": self.config.api_key or "ollama",
+            "api_key": self.config.api_key or "not-needed",
             "timeout": self.config.timeout,
         }
         if self.config.base_url:
